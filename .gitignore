@@ -1,0 +1,22 @@
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/dbt_modules/
+dbt/logs/
+dbt/profiles.yml
+
+# Databricks
+.databricks/
+.user.yml
+
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+
+# Env / secrets
+.env
+*.token
+
+#vscode
+.vscode

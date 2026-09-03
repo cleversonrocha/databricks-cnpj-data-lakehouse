@@ -1,0 +1,1154 @@
+version: 2
+
+models:
+  - name: agg_fact_estabelecimentos_cnaes
+    description: "Agregação da quantidade de estabelecimentos por CNAE."        
+    columns:
+      - name: sk_cnae
+        description: "SK do CNAE."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_cnaes')
+                field: sk_id
+
+      - name: sk_tempo_inicio_atividade
+        description: "SK da dim_tempo_inicio_atividades."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_tempo_inicio_atividades')
+                field: sk_id
+
+      - name: sk_situacoes
+        description: "SK da dim_situacoes."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_situacoes')
+                field: sk_id
+
+      - name: sk_localidades
+        description: "SK da dim_localidades."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_localidades')
+                field: sk_id
+
+      - name: tipo_cnae
+        description: "PRINCIPAL ou SECUNDÁRIO"
+        data_type: string
+        constraints:
+          - type: not_null
+          - type: check
+            name: chk_tipo_cnae_principal_secundario_agg_fact
+            expression: "tipo_cnae IN ('PRINCIPAL', 'SECUNDÁRIO')"        
+
+      - name: qtd_cnaes
+        description: "Quantidade de CNAES por dimensões agrupadas."
+        data_type: smallint
+        constraints:
+          - type: not_null
+    
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sk_cnae               
+              - sk_tempo_inicio_atividade
+              - sk_situacoes
+              - sk_localidades
+              - tipo_cnae
+
+  - name: agg_fact_estabelecimentos
+    description: "Tabela agregada para fact_estabelecimentos."        
+    columns:
+      - name: sk_tempo_inicio_atividade
+        description: "Sk da dim_tempo_inicio_atividades."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_tempo_inicio_atividades')
+                field: sk_id
+
+      - name: sk_situacoes
+        description: "SK da dim_situacoes"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_situacoes')
+                field: sk_id
+
+      - name: sk_localidades
+        description: "SK da dim_localidades."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_localidades')
+                field: sk_id
+
+      - name: sk_naturezas_juridicas
+        description: "SK da dim_naturezas_juridicas."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_naturezas_juridicas')
+                field: sk_id
+
+      - name: qtd_matrizes
+        description: "Quantidade de estabelecimentos do tipo MATRIZ."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_filiais
+        description: "Quantidade de estabelecimentos do tipo FILIAL."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_nulas
+        description: "Quantidade de estabelecimentos que estão com a situação NULA."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_ativas
+        description: "Quantidade de estabelecimentos que estão com a situação ATIVA."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_suspensas
+        description: "Quantidade de estabelecimentos que estão com a situação SUSPENSA."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_inaptas
+        description: "Quantidade de estabelecimentos que estão com a situação INAPTA."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_baixadas
+        description: "Quantidade de estabelecimentos que estão com a situação BAIXADA."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_epp
+        description: "Quantidade de estabelecimentos EPP."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_me
+        description: "Quantidade de estabelecimentos ME."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_demais
+        description: "Quantidade de estabelecimentos DEMAIS."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_mei
+        description: "Quantidade de estabelecimentos MEI."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qtd_estabelecimentos
+        description: "Quantidade de estabelecimentos da empresa."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:                             
+              - sk_tempo_inicio_atividade
+              - sk_situacoes
+              - sk_localidades
+              - sk_naturezas_juridicas
+
+  - name: bridge_estabelecimentos_cnaes
+    description: "Relação many-to-many entre estabelecimentos e CNAEs."        
+    columns:
+      - name: sk_estabelecimento
+        description: "SK do estabelecimento."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: sk_cnae
+        description: "SK do CNAE."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_cnaes')
+                field: sk_id
+
+      - name: tipo_cnae
+        description: "PRINCIPAL ou SECUNDÁRIO"
+        data_type: string
+        constraints:
+          - type: check
+            name: chk_tipo_cnae_principal_secundario_bridge
+            expression: "tipo_cnae IN ('PRINCIPAL', 'SECUNDÁRIO')"        
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sk_estabelecimento
+              - sk_cnae
+              - tipo_cnae
+
+  - name: bridge_estabelecimentos_socios
+    description: "Relação many-to-many entre estabelecimentos e sócios."    
+    columns:
+      - name: sk_estabelecimento
+        description: "SK do estabelecimento."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: sk_socio
+        description: "SK do sócio."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_socios')
+                field: sk_id
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sk_estabelecimento
+              - sk_socio              
+
+  - name: dim_cnaes
+    description: "Dimensão de Classificação Nacional de Atividades Econômicas (CNAE)."    
+    columns:
+      - name: sk_id
+        description: "Surrogate Key"
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: codigo
+        description: "Código CNAE"
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+
+      - name: codigo_formatado
+        description: "Código CNAE formatado"
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: descricao
+        description: "Descrição da atividade econômica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_cadastro
+    description: "Dimensão de cadastro dos estabelecimentos."        
+    columns:
+      - name: sk_id
+        description: "Surrogate Key da dim_cadastro"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:        
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: cnpj_completo
+        description: "CNPJ completo com máscara."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+
+      - name: identificador_matriz_filial
+        description: "Identificador de Matriz ou Filial."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_abertura
+        description: "Data de abertura do estabelecimento."
+        data_type: date
+        constraints:
+          - type: not_null
+
+      - name: razao_social
+        description: "Razão social do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: nome_fantasia
+        description: "Nome fantasia do estabelecimento."
+        data_type: string
+
+      - name: codigo_porte_empresa
+        description: "Código do porte da empresa do estabelecimento."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_portes_empresas')
+                field: codigo
+
+      - name: porte_empresa
+        description: "Porte da empresa do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: capital_social
+        description: "Capital social da empresa do estabelecimento."
+        data_type: decimal(15,2)
+        constraints:
+          - type: not_null
+
+      - name: codigo_natureza_juridica
+        description: "Código da natureza jurídica da empresa do estabelecimento."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_naturezas')
+                field: codigo
+
+      - name: natureza_juridica
+        description: "Natureza jurídica da empresa do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: logradouro
+        description: "Endereço do estabelecimento."
+        data_type: string
+
+      - name: numero
+        description: "Número do endereço."
+        data_type: string
+
+      - name: complemento
+        description: "Complemento do endereço."
+        data_type: string
+
+      - name: cep
+        description: "Código de endereçamento postal."
+        data_type: string
+
+      - name: bairro
+        description: "Bairro do endereço."
+        data_type: string
+
+      - name: municipio
+        description: "Município do endereço."
+        data_type: string
+
+      - name: uf
+        description: "Unidade federativa do endereço."
+        data_type: string
+
+      - name: regiao
+        description: "Região do endereço."
+        data_type: string
+
+      - name: pais
+        description: "País do endereço."
+        data_type: string
+
+      - name: cidade_exterior
+        description: "Cidade no exterior."
+        data_type: string
+
+      - name: email
+        description: "Endereço eletrônico."
+        data_type: string
+
+      - name: telefone_1
+        description: "Telefone com ddd."
+        data_type: string
+
+      - name: telefone_2
+        description: "Telefone com ddd."
+        data_type: string
+
+      - name: fax
+        description: "Fax com ddd."
+        data_type: string
+
+      - name: ente_federativo_responsavel
+        description: "Ente federativo responsável pelo estabelecimento."
+        data_type: string
+
+      - name: situacao_cadastral
+        description: "Situação cadastral do estabelecimento."
+        data_type: string
+
+      - name: motivo_situacao_cadastral
+        description: "Motivo da situação cadastral do estabelecimento."
+        data_type: string
+
+      - name: data_situacao_cadastral
+        description: "Data da situação cadastral do estabelecimento."
+        data_type: date
+
+      - name: situacao_especial
+        description: "Situação especial do estabelecimento."
+        data_type: string
+
+      - name: data_situacao_especial
+        description: "Data da situação especial do estabelecimento."
+        data_type: date
+
+      - name: opcao_simples
+        description: "Opção pelo Simples Nacional."
+        data_type: string
+
+      - name: opcao_mei
+        description: "Opção pelo MEI."
+        data_type: string
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_localidades
+    description: "Localidades dos estabelecimentos"        
+    columns:
+      - name: sk_id
+        description: "Surrogate Key da dim_localidades (municipio,cidade_exterior,uf,pais)"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: codigo_municipio
+        description: "Código do município do logradouro."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_municipios')
+                field: codigo
+
+      - name: municipio
+        description: "Descrição do município do logradouro."
+        data_type: string
+        
+      - name: codigo_cidade_exterior
+        description: "Código da cidade do estabelecimento quando do exterior."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:        
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_cidades_exterior')
+                field: codigo
+
+      - name: cidade_exterior
+        description: "Cidade do estabelecimento quando do exterior."
+        data_type: string
+        
+      - name: codigo_uf
+        description: "Código da UF do município ou cidade do exterior (EX)."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:        
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_ufs')
+                field: codigo
+
+      - name: uf
+        description: "Sigla do estado do município ou cidade do exterior (EX)."
+        data_type: string
+        
+      - name: regiao
+        description: "Região do município ou cidade do exterior."
+        data_type: string
+        
+      - name: codigo_pais
+        description: "Código do País da UF."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_paises')
+                field: codigo
+
+      - name: pais
+        description: "Descrição do País da UF."
+        data_type: string
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - codigo_municipio               
+              - municipio
+              - codigo_cidade_exterior
+              - cidade_exterior
+              - codigo_uf
+              - uf
+              - regiao
+              - codigo_pais
+              - pais
+              - data_processamento
+
+  - name: dim_naturezas_juridicas
+    description: "Dimensão de naturezas jurídicas das empresas."    
+    columns:
+      - name: sk_id
+        description: "Surrogate Key da dim_naturezas_juridicas"
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: codigo
+        description: "Código da natureza jurídica."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+
+      - name: codigo_formatado
+        description: "Código formatado da natureza jurídica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: descricao
+        description: "Descrição da natureza jurídica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_situacoes
+    description: "Dimensão de situações dos estabelecimentos."        
+    columns:
+      - name: sk_id
+        description: "Surrogate Key da dim_situacoes (identificador_matriz_filial,situacao_cadastral,motivo_situacao_cadastral,situacao_especial)"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: codigo_identificador_matriz_filial
+        description: "Código de Matriz ou Filial."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tipos_estabelecimentos')
+                field: codigo
+
+      - name: identificador_matriz_filial
+        description: "Descrição de Matriz ou Filial."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: codigo_situacao_cadastral
+        description: "Código da situação cadastral do estabelecimento."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_cadastrais')
+                field: codigo
+
+      - name: situacao_cadastral
+        description: "Descrição da situação cadastral do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null        
+
+      - name: codigo_motivo_situacao_cadastral
+        description: "Código do motivo da situação cadastral do estabelecimento."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_cadastrais_motivos')
+                field: codigo
+
+      - name: motivo_situacao_cadastral
+        description: "Descrição do motivo da situação cadastral do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: codigo_situacao_especial
+        description: "Código da situação especial do estabelecimento."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_especiais')
+                field: codigo
+
+      - name: situacao_especial
+        description: "Descrição da situação especial do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - codigo_identificador_matriz_filial               
+              - identificador_matriz_filial
+              - codigo_situacao_cadastral
+              - situacao_cadastral
+              - codigo_motivo_situacao_cadastral
+              - motivo_situacao_cadastral
+              - codigo_situacao_especial
+              - situacao_especial
+
+  - name: dim_socios
+    description: "Dimensão de sócios das empresas."        
+    columns:
+      - name: sk_id
+        description: "Surrogate key da int_socios"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_socios')
+                field: sk_id
+
+      - name: cnpj_basico
+        description: "Oito primeiros dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: identificador
+        description: "Identificador tipo pessoa Física/Jurídica/Estrangeiro."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tipos_pessoas')
+                field: codigo
+
+      - name: tipo_pessoa
+        description: "Física/Jurídica/Estrangeiro."
+        data_type: string        
+
+      - name: nome_razao_social
+        description: "Nome/Razão Social do sócio."
+        data_type: string        
+
+      - name: cpf_cnpj
+        description: "Documento do sócio."
+        data_type: string        
+
+      - name: qualificacao
+        description: "Código da qualificação do sócio."
+        data_type: tinyint
+        data_tests:          
+          - relationships:
+              arguments:
+                to: ref('int_qualificacoes')
+                field: codigo
+
+      - name: descricao_qualificacao
+        description: "Descrição da qualificação do sócio."
+        data_type: string        
+
+      - name: data_entrada_sociedade
+        description: "Data de entrada na sociedade."
+        data_type: date        
+
+      - name: pais
+        description: "Código país do sócio."
+        data_type: smallint
+        data_tests:          
+          - relationships:
+              arguments:
+                to: ref('int_paises')
+                field: codigo
+
+      - name: descricao_pais
+        description: "Descrição do país do sócio."
+        data_type: string        
+
+      - name: representante_legal
+        description: "Documento do representante legal."
+        data_type: string        
+
+      - name: nome_do_representante
+        description: "Nome do representante legal."
+        data_type: string        
+
+      - name: qualificacao_representante
+        description: "Código da qualificação do representante legal."
+        data_type: tinyint
+        data_tests:          
+          - relationships:
+              arguments:
+                to: ref('int_qualificacoes')
+                field: codigo
+
+      - name: descricao_qualificacao_representante
+        description: "Descrição da qualificação do representante."
+        data_type: string        
+
+      - name: faixa_etaria_socio
+        description: "Código da faixa etária do sócio."
+        data_type: tinyint
+        data_tests:          
+          - relationships:
+              arguments:
+                to: ref('int_faixas_etarias')
+                field: codigo
+
+      - name: descricao_faixa_etaria_socio
+        description: "Descrição da faixa etária do sócio."
+        data_type: string        
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_tempo_inicio_atividades
+    description: "Dimensão de tempo agregada a nível mensal, gerada a partir das datas de início da atividade dos estabelecimentos."        
+    columns:
+      - name: sk_id
+        description: "Chave substituta (Surrogate Key) formatada como número inteiro (YYYYMMDD)."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_inicio_atividades')
+                field: sk_id
+
+      - name: data_referencia
+        description: "Data de referência correspondente à chave substituta."
+        data_type: date
+        data_tests:
+          - unique
+
+      - name: ano
+        description: "Ano correspondente à data."
+        data_type: smallint
+
+      - name: mes
+        description: "Mês correspondente à data."
+        data_type: tinyint
+
+      - name: nome_mes
+        description: "Descrição do mês."
+        data_type: string
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_tempo_situacoes_cadastrais
+    description: "Dimensão de tempo agregada a nível mensal, gerada a partir das datas da situação cadastral dos estabelecimentos."        
+    columns:
+      - name: sk_id
+        description: "Chave substituta (Surrogate Key) formatada como número inteiro (YYYYMMDD)."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_situacoes_cadastrais')
+                field: sk_id
+
+      - name: data_referencia
+        description: "Data de referência correspondente à chave substituta."
+        data_type: date
+        data_tests:
+          - unique
+
+      - name: ano
+        description: "Ano correspondente à data."
+        data_type: smallint
+
+      - name: mes
+        description: "Mês correspondente à data."
+        data_type: tinyint
+
+      - name: nome_mes
+        description: "Descrição do mês."
+        data_type: string
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: dim_tempo_situacoes_especiais
+    description: "Dimensão de tempo agregada a nível mensal, gerada a partir das datas de situação especial dos estabelecimentos."        
+    columns:
+      - name: sk_id
+        description: "Chave substituta (Surrogate Key) formatada como número inteiro (YYYYMMDD)."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_situacoes_especiais')
+                field: sk_id
+
+      - name: data_referencia
+        description: "Data de referência correspondente à chave substituta."
+        data_type: date
+        data_tests:
+          - unique
+
+      - name: ano
+        description: "Ano correspondente à data."
+        data_type: smallint
+
+      - name: mes
+        description: "Mês correspondente à data."
+        data_type: tinyint
+
+      - name: nome_mes
+        description: "Descrição do mês."
+        data_type: string
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: fact_estabelecimentos
+    description: "Tabela fato para estabelecimentos."        
+    columns:
+      - name: sk_estabelecimento
+        description: "SK da fact_estabelecimentos"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: sk_tempo_inicio_atividade
+        description: "SK da dim_tempo"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_inicio_atividades')
+                field: sk_id
+
+      - name: sk_tempo_situacoes_especiais
+        description: "SK da dim_tempo"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_situacoes_especiais')
+                field: sk_id
+
+      - name: sk_tempo_situacoes_cadastrais
+        description: "SK da dim_tempo"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tempo_situacoes_cadastrais')
+                field: sk_id
+
+      - name: sk_situacoes
+        description: "SK da dim_situacoes"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_situacoes')
+                field: sk_id
+
+      - name: sk_localidades
+        description: "SK da dim_localidades."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_localidades')
+                field: sk_id
+
+      - name: sk_naturezas_juridicas
+        description: "SK da dim_naturezas_juridicas."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_naturezas_juridicas')
+                field: sk_id
+
+      - name: is_matriz
+        description: "Flag binária para matriz."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_filial
+        description: "Flag binária para filial."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_me
+        description: "Flag binária para Micro Empresa."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_epp
+        description: "Flag binária para Pequeno Porte."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_demais
+        description: "Flag binária para Demais."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_simples
+        description: "Flag binária para optante pelo simples nacional."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_mei
+        description: "Flag binária para micro empreendedor individual."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_nula
+        description: "Flag binária para situação NULA."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_ativa
+        description: "Flag binária para situação ATIVA."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_suspensa
+        description: "Flag binária para situação SUSPENSA."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_inapta
+        description: "Flag binária para situação INAPTA."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: is_baixada
+        description: "Flag binária para situação BAIXADA."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null

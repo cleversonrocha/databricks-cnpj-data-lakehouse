@@ -1,0 +1,36 @@
+version: 1
+
+data_tests:
+  - name: assert_qtd_models_empresas
+    description: >
+      Valida a consistência de volume de registros no fluxo de empresas.
+      Compara a contagem de `cnpj_basico` entre `stg_empresas` e `int_empresas`,
+      considerando que a diferença entre as duas camadas deve ser exatamente
+      igual à quantidade de registros descartados em `int_empresas_nao_qualificadas`.
+      Falha quando (staging - não_qualificadas) != intermediate, indicando
+      perda ou duplicação inesperada de registros durante o processamento.
+
+  - name: assert_qtd_models_estabelecimentos
+    description: >
+      Valida a consistência de volume de registros ao longo de todo o pipeline
+      de estabelecimentos (staging → intermediate → dim_cadastro → 
+      fact_estabelecimentos). Compara a contagem de `cnpj_basico` nas camadas
+      staging/intermediate com a contagem de `sk_id`/`sk_estabelecimento` nas
+      camadas de dimensão e fato. Falha se qualquer uma das quatro camadas
+      apresentar uma quantidade diferente das demais, sinalizando perda ou
+      duplicação de registros em alguma etapa da transformação.
+
+  - name: assert_qtd_models_socios
+    description: >
+      Valida a consistência de volume de registros no fluxo de sócios,
+      comparando a contagem de `cnpj_basico` entre `stg_socios` e `int_socios`.
+      Falha se as duas camadas apresentarem quantidades diferentes, indicando
+      perda ou duplicação de registros durante a etapa intermediate.
+
+  - name: assert_unique_estabelecimentos
+    description: >
+      Garante a unicidade da chave natural de estabelecimento na camada raw
+      (silver). Verifica se a combinação (`cnpj_basico`, `cnpj_ordem`, `cnpj_dv`)
+      não se repete no arquivo Parquet de origem lido via `get_s3_path()`.
+      Falha se houver qualquer combinação duplicada, o que indicaria
+      inconsistência nos dados brutos antes mesmo da ingestão para o Bronze.

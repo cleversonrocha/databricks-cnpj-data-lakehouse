@@ -1,0 +1,1187 @@
+version: 2
+
+models:
+  - name: int_cidades_exterior
+    description: "Tabela com os municípios do exterior dos estabelecimentos."        
+    columns:
+      - name: codigo
+        description: "Código do município."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do município."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_cnaes_principais
+    description: "Tabela intermediária de CNAEs principais dos estabelecimentos."    
+    columns:
+      - name: sk_estabelecimento
+        description: "SK do estabelecimento."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: fk_cnae
+        description: "FK do CNAE."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_cnaes')
+                field: codigo
+
+      - name: tipo_cnae
+        description: "PRINCIPAL"
+        data_type: string
+        constraints:
+          - type: check
+            name: chk_cnaes_principais_tipo
+            expression: "tipo_cnae IN ('PRINCIPAL')"
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_cnaes_secundarios
+    description: "Tabela intermediária de CNAEs secundários dos estabelecimentos."        
+    columns:
+      - name: sk_estabelecimento
+        description: "SK do estabelecimento."
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_estabelecimentos')
+                field: sk_id
+
+      - name: fk_cnae
+        description: "FK do CNAE."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_cnaes')
+                field: codigo
+
+      - name: tipo_cnae
+        description: "SECUNDÁRIO"
+        data_type: string
+        constraints:
+          - type: check
+            name: chk_cnaes_secundarios_tipo
+            expression: "tipo_cnae IN ('SECUNDÁRIO')"
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sk_estabelecimento
+              - fk_cnae
+              
+  - name: int_cnaes
+    description: "Classificação Nacional de Atividades Econômicas (CNAE)."        
+    columns:
+      - name: codigo
+        description: "Código CNAE"
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: codigo_formatado
+        description: "Código CNAE formatado"
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: descricao
+        description: "Descrição da atividade econômica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_empresas_nao_qualificadas
+    description: "Tabela com os CNPJ duplicados."    
+    columns:
+      - name: cnpj_basico
+        description: "cnpj_basico"
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: razao_social
+        description: "razao_social"
+        data_type: string
+
+      - name: natureza_juridica
+        description: "natureza_juridica"
+        data_type: smallint
+
+      - name: qualificacao_responsavel
+        description: "qualificacao_responsavel"
+        data_type: tinyint
+
+      - name: capital_social
+        description: "porte_empresa"
+        data_type: decimal(15,2)
+
+      - name: porte_empresa
+        description: "porte_empresa"
+        data_type: tinyint
+
+      - name: ente_federativo_responsavel
+        description: "ente_federativo_responsavel"
+        data_type: string
+
+      - name: rn
+        description: "ordem da qualificação"
+        data_type: integer
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_empresas
+    description: "Empresas."        
+    columns:
+      - name: cnpj_basico
+        description: "Oito primeiros dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: razao_social
+        description: "Razão social da empresa."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: natureza_juridica
+        description: "Natureza jurídica da empresa."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: qualificacao_responsavel
+        description: "Qualificação do responsável pela empresa."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: capital_social
+        description: "Valor correspondente ao capital social da empresa."
+        data_type: decimal(15,2)
+        constraints:
+          - type: not_null
+
+      - name: porte_empresa
+        description: "Porte da empresa."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: ente_federativo_responsavel
+        description: "Ente federativo responsável pela empresa."
+        data_type: smallint
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_entes_federativos
+    description: "Ente federativo responsável pela empresa."       
+    columns:
+      - name: codigo
+        description: "Código do ente federativo."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do ente federativo."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_estabelecimentos
+    description: "Estabelecimentos (matrizes e filiais) da Receita Federal."    
+    columns:
+      - name: sk_id
+        description: "SK da dim_estabelecimentos"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: cnpj_basico
+        description: "Oito primeiros dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: cnpj_ordem
+        description: "9º até o 12º dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: cnpj_dv
+        description: "2 últimos dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        
+      - name: identificador_matriz_filial
+        description: "1 - MATRIZ, 2 - FILIAL"
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_tipos_estabelecimentos')
+                field: codigo
+
+      - name: nome_fantasia
+        description: "Nome fantasia do estabelecimento."
+        data_type: string
+
+      - name: situacao_cadastral
+        description: "Situação cadastral do estabelecimento."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_cadastrais')
+                field: codigo
+
+      - name: data_situacao_cadastral
+        description: "Data da situação cadastral."
+        data_type: date
+
+      - name: motivo_situacao_cadastral
+        description: "Motivo da situação cadastral."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_cadastrais_motivos')
+                field: codigo
+
+      - name: cidade_exterior
+        description: "Código da cidade do exterior."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_cidades_exterior')
+                field: codigo
+
+      - name: pais
+        description: "Código do país."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_paises')
+                field: codigo
+
+      - name: data_inicio_atividade
+        description: "Data de início da atividade."
+        data_type: date
+        constraints:
+          - type: not_null
+
+      - name: cnae_fiscal_principal
+        description: "CNAE principal do estabelecimento."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_cnaes')
+                field: codigo
+
+      - name: cnae_fiscal_secundaria
+        description: "Lista separada por vírgula dos CNAES secundários do estabelecimento."
+        data_type: string
+
+      - name: tipo_logradouro
+        description: "Rua, Av... do logradouro."
+        data_type: string
+
+      - name: logradouro
+        description: "Descrição do endereço."
+        data_type: string
+
+      - name: numero
+        description: "Número do endereço."
+        data_type: string
+
+      - name: complemento
+        description: "Complemento do endereço."
+        data_type: string
+
+      - name: bairro
+        description: "Nome do bairro."
+        data_type: string
+
+      - name: cep
+        description: "Código de endereçamento postal do endereço."
+        data_type: string
+
+      - name: uf
+        description: "Código do Estado."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_ufs')
+                field: codigo
+
+      - name: municipio
+        description: "Código do município."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_municipios')
+                field: codigo
+
+      - name: ddd_1
+        description: "Número do DDD do primeiro telefone."
+        data_type: string
+
+      - name: telefone_1
+        description: "Número do primeiro telefone."
+        data_type: string
+
+      - name: ddd_2
+        description: "Número do DDD do segundo telefone."
+        data_type: string
+
+      - name: telefone_2
+        description: "Número do telefone do segundo telefone."
+        data_type: string
+
+      - name: ddd_fax
+        description: "Número do DDD do FAX."
+        data_type: string
+
+      - name: fax
+        description: "Número do FAX."
+        data_type: string
+
+      - name: email
+        description: "Endereço de email."
+        data_type: string
+
+      - name: situacao_especial
+        description: "Código da situação especial."
+        data_type: tinyint
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('int_situacoes_especiais')
+                field: codigo
+
+      - name: data_situacao_especial
+        description: "Data da situação especial."
+        data_type: date
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - cnpj_basico
+              - cnpj_ordem
+              - cnpj_dv
+
+  - name: int_faixas_etarias
+    description: "Faixas etárias dos sócios da empresa."      
+    columns:
+      - name: codigo
+        description: "Código da faixa etária."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+          - type: check
+            name: chk_codigo_faixas_etarias
+            expression: "codigo IN (-2,-1,0,1,2,3,4,5,6,7,8,9)"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição da faixa etária."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_municipios
+    description: "Tabela com os municípios dos estabelecimentos."    
+    columns:
+      - name: codigo
+        description: "Código do município"
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do município."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_naturezas
+    description: "Natureza jurídica da empresa."        
+    columns:
+      - name: codigo
+        description: "Código da natureza jurídica."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: codigo_formatado
+        description: "Código com a descrição da natureza jurídica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: descricao
+        description: "Descrição da natureza jurídica."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_paises
+    description: "Tabela dos códigos dos países."       
+    columns:
+      - name: codigo
+        description: "Código do país."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do país."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_portes_empresas
+    description: "Tipos de porte da empresa."      
+    columns:
+      - name: codigo
+        description: "Código do porte."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: sigla
+        description: "Sigla do porte."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: descricao
+        description: "Descrição do porte."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_qualificacoes
+    description: "Tabela das qualificações dos sócios e representantes dos sócios."       
+    columns:
+      - name: codigo
+        description: "Código da qualificação."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição da qualificação."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_simples
+    description: "Dados do SIMPLES NACIONAL."        
+    columns:
+      - name: cnpj_basico
+        description: "Oito primeiros dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: opcao_simples
+        description: "Indicador da existência da opção pelo SIMPLES."
+        data_type: string
+        constraints:
+          - type: not_null
+          - type: check
+            name: chk_opcao_simples
+            expression: "opcao_simples IN ('S','N','EM BRANCO')"
+
+      - name: data_opcao_simples
+        description: "Data de opção pelo SIMPLES."
+        data_type: date
+
+      - name: data_exclusao_simples
+        description: "Data de exclusão do SIMPLES."
+        data_type: date
+
+      - name: opcao_mei
+        description: "Indicador de existência da opção pelo MEI."
+        data_type: string
+        constraints:
+          - type: check
+            name: chk_opcao_mei
+            expression: "opcao_mei IN ('S','N','EM BRANCO')"
+
+      - name: data_opcao_mei
+        description: "Data de opção pelo MEI."
+        data_type: date
+
+      - name: data_exclusao_mei
+        description: "Data de exclusão do MEI."
+        data_type: date
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_situacoes_cadastrais_motivos
+    description: "Situação cadastral dos estabelecimentos."        
+    columns:
+      - name: codigo
+        description: "Código da situação motivo."
+        data_type: smallint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição da situação motivo."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_situacoes_cadastrais
+    description: "Situação cadastral."      
+    columns:
+      - name: codigo
+        description: "Código da situação cadastral."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição da situação cadastral."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_situacoes_especiais
+    description: "Situação especial dos estabelecimentos."      
+    columns:
+      - name: codigo
+        description: "Código da situação especial."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição da situação especial."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_socios
+    description: "Sócios das empresas."        
+    columns:
+      - name: sk_id
+        description: "Surrogate key ROW_NUMBER() OVER()"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: cnpj_basico
+        description: "Oito primeiros dígitos do CNPJ."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: identificador
+        description: "Código identificador do tipo da pessoa Física/Jurídica/Estrangeiro."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: nome_razao_social
+        description: "Nome do sócio pessoa física ou razão social."
+        data_type: string
+
+      - name: cpf_cnpj
+        description: "CPF ou CNPJ do sócio."
+        data_type: string
+
+      - name: qualificacao
+        description: "Código da qualificação do sócio."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+
+      - name: data_entrada_sociedade
+        description: "Data de entrada na sociedade."
+        data_type: date
+        constraints:
+          - type: not_null
+
+      - name: pais
+        description: "Código do país do sócio."
+        data_type: smallint
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('int_paises')
+                field: codigo
+
+      - name: representante_legal
+        description: "Número do CPF do representante legal."
+        data_type: string
+
+      - name: nome_do_representante
+        description: "Nome do representante legal."
+        data_type: string
+
+      - name: qualificacao_representante
+        description: "Qualificação do representante legal."
+        data_type: tinyint
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('int_qualificacoes')
+                field: codigo
+
+      - name: faixa_etaria_socio
+        description: "Código da faixa etária do sócio."
+        data_type: tinyint
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('int_faixas_etarias')
+                field: codigo
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+  - name: int_tempo_entrada_sociedade
+    description: "Tabela tempo para fact_socios"       
+    columns:
+      - name: sk_id
+        description: "SK da int_tempo_entrada_sociedade"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: data_referencia
+        description: "Data de entrada na sociedade."
+        data_type: date        
+
+      - name: ano
+        description: "Número do Ano."
+        data_type: smallint
+        
+      - name: mes
+        description: "Número do Mês."
+        data_type: tinyint
+        
+      - name: dia
+        description: "Dia."
+        data_type: tinyint
+        
+      - name: trimestre
+        description: "Trimestre."
+        data_type: tinyint
+
+      - name: semestre
+        description: "Semestre."
+        data_type: tinyint
+
+      - name: dia_semana_numero
+        description: "Número do dia da semana."
+        data_type: tinyint
+
+      - name: nome_mes
+        description: "Nome do mês."
+        data_type: string
+
+      - name: nome_dia_semana
+        description: "Nome do dia da semana."
+        data_type: string
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp
+        constraints:
+          - type: not_null
+    
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ano
+              - mes
+              - dia
+
+  - name: int_tempo_inicio_atividades
+    description: "Tabela tempo para fact_estabelecimentos"       
+    columns:
+      - name: sk_id
+        description: "SK da int_tempo_inicio_atividades"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: data_referencia
+        description: "Data de início da atividade do estabelecimento."
+        data_type: date
+        
+      - name: ano
+        description: "Número do Ano."
+        data_type: smallint
+                
+      - name: mes
+        description: "Número do Mês."
+        data_type: tinyint
+                
+      - name: dia
+        description: "Dia."
+        data_type: tinyint
+                
+      - name: trimestre
+        description: "Trimestre."
+        data_type: tinyint
+        
+      - name: semestre
+        description: "Semestre."
+        data_type: tinyint
+        
+      - name: dia_semana_numero
+        description: "Número do dia da semana."
+        data_type: tinyint
+        
+      - name: nome_mes
+        description: "Nome do mês."
+        data_type: string
+        
+      - name: nome_dia_semana
+        description: "Nome do dia da semana."
+        data_type: string
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null      
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ano
+              - mes
+              - dia
+
+  - name: int_tempo_situacoes_cadastrais
+    description: "Tabela tempo para fact_estabelecimentos"      
+    columns:
+      - name: sk_id
+        description: "SK da int_tempo_situacoes_cadastrais"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: data_referencia
+        description: "Data da situação cadastral."
+        data_type: date  
+                
+      - name: ano
+        description: "Número do Ano."
+        data_type: smallint
+                
+      - name: mes
+        description: "Número do Mês."
+        data_type: tinyint
+                
+      - name: dia
+        description: "Dia."
+        data_type: tinyint
+                
+      - name: trimestre
+        description: "Trimestre."
+        data_type: tinyint
+        
+      - name: semestre
+        description: "Semestre."
+        data_type: tinyint
+        
+      - name: dia_semana_numero
+        description: "Número do dia da semana."
+        data_type: tinyint
+        
+      - name: nome_mes
+        description: "Nome do mês."
+        data_type: string
+        
+      - name: nome_dia_semana
+        description: "Nome do dia da semana."
+        data_type: string
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null     
+    
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ano
+              - mes
+              - dia
+
+  - name: int_tempo_situacoes_especiais    
+    columns:
+      - name: sk_id
+        description: "SK da int_tempo_situacoes_especiais"
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:          
+          - not_null
+
+      - name: data_referencia
+        description: "Data da situação especial."
+        data_type: date  
+        
+      - name: ano
+        description: "Número do Ano."
+        data_type: smallint
+                
+      - name: mes
+        description: "Número do Mês."
+        data_type: tinyint
+                
+      - name: dia
+        description: "Dia."
+        data_type: tinyint
+                
+      - name: trimestre
+        description: "Trimestre."
+        data_type: tinyint
+        
+      - name: semestre
+        description: "Semestre."
+        data_type: tinyint
+        
+      - name: dia_semana_numero
+        description: "Número do dia da semana."
+        data_type: tinyint
+        
+      - name: nome_mes
+        description: "Nome do mês."
+        data_type: string
+        
+      - name: nome_dia_semana
+        description: "Nome do dia da semana."
+        data_type: string
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ano
+              - mes
+              - dia
+
+  - name: int_tipos_estabelecimentos
+    description: "Tabela dos tipos de estabelecimentos"     
+    columns:
+      - name: codigo
+        description: "Código identificador do tipo do estabelecimento."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do tipo do estabelecimento."
+        data_type: string 
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null       
+
+  - name: int_tipos_pessoas
+    description: "Tabela dos tipos de pessoas da sociedade."        
+    columns:
+      - name: codigo
+        description: "Código do tipo."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do tipo."
+        data_type: string
+        constraints:
+          - type: not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null
+
+  - name: int_ufs
+    description: "Estados brasileiros, EX (EXterior), NI (Não Informado)"        
+    columns:
+      - name: codigo
+        description: "Código do uf."
+        data_type: tinyint
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: sigla
+        description: "Sigla da UF."
+        data_type: string
+        constraints:           
+          - type: not_null        
+          - type: check
+            name: chk_sigla_uf
+            expression: "sigla IN('NÃO INF.','NÃO IDENT.','AC','AP','AM','PA','RO','RR','TO','AL','BA','CE','MA','PB','PE','PI','RN','SE','DF','GO','MT','MS','ES','MG','RJ','SP','PR','RS','SC','EX')"
+
+      - name: descricao
+        description: "Descrição da uf."
+        data_type: string
+        constraints:
+          - type: not_null      
+
+      - name: regiao
+        description: "Região para os estados do BRASIL."
+        data_type: string
+        constraints:
+          - type: not_null
+          - type: check
+            name: chk_regiao
+            expression: "regiao IN('NÃO INDENTIFICADO','NÃO INFORMADO','NORTE','NORDESTE','CENTRO-OESTE','SUDESTE','SUL','EXTERIOR')"
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_type: timestamp  
+        constraints:
+          - type: not_null

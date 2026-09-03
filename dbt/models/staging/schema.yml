@@ -1,0 +1,378 @@
+version: 1
+
+sources:
+  - name: silver
+    database: databricks_cnpj_data_lakehouse
+    schema: silver
+    tables:
+      - name: raw_cnaes
+        description: "Tabela bruta de CNAEs, carregada pelo notebook de ingestão PySpark."
+      - name: raw_empresas
+        description: "Tabela bruta de empresas."
+      - name: raw_estabelecimentos
+        description: "Tabela bruta de estabelecimentos (maior volume, 72M+ linhas)."
+      - name: raw_motivos
+        description: "Tabela bruta de motivos de situação cadastral."
+      - name: raw_municipios
+        description: "Tabela bruta de municípios."
+      - name: raw_naturezas
+        description: "Tabela bruta de naturezas jurídicas."
+      - name: raw_paises
+        description: "Tabela bruta de países."
+      - name: raw_qualificacoes
+        description: "Tabela bruta de qualificações de sócios/responsáveis."
+      - name: raw_simples
+        description: "Tabela bruta de opção pelo Simples Nacional/MEI."
+      - name: raw_socios
+        description: "Tabela bruta de sócios."
+      
+models:
+  - name: stg_cnaes
+    description: "Tabela de Classificação Nacional de Atividades Econômicas (CNAE) da Receita Federal."
+    columns:      
+      - name: codigo        
+        description: "Código da atividade econômica."        
+        data_tests:
+          - unique
+          - not_null      
+
+      - name: descricao
+        description: "Nome da atividade econômica."        
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."        
+        data_tests:
+          - not_null
+
+  - name: stg_empresas
+    description: "Tabela de empresas."
+    columns:
+      - name: cnpj_basico
+        description: "Número base de inscrição no CNPJ (OITO PRIMEIROS DÍGITOS DO CNPJ)."                              
+                        
+      - name: razao_social
+        description: "Nome empresarial da pessoa jurídica."
+                
+      - name: natureza_juridica
+        description: "Código da natureza jurídica."
+        data_tests:
+          - not_null
+        
+      - name: qualificacao_responsavel
+        description: "Qualificação da pessoa física responsável pela empresa."
+        data_tests:
+          - not_null
+        
+      - name: capital_social
+        description: "Capital social da empresa."        
+        data_tests:
+          - not_null
+        
+      - name: porte_empresa
+        description: "Código do porte da empresa."
+                        
+      - name: ente_federativo_responsavel        
+        description: "O ente federativo responsável é preenchido para os casos de orgãos e entidades do grupo de natureza jurídica 1xxx. Para as demais naturezas, este atributo fica em branco."
+            
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_tests:
+          - not_null
+
+  - name: stg_estabelecimentos
+    description: "Tabela contendo os dados cadastrais dos estabelecimentos (Matrizes e Filiais) extraídos da Receita Federal."        
+    columns:
+      - name: cnpj_basico
+        description: "Número base de inscrição no CNPJ (Oito primeiros dígitos)."
+        data_tests:
+          - not_null
+        
+      - name: cnpj_ordem
+        description: "Número do estabelecimento de inscrição no CNPJ (Do nono até o décimo segundo dígito)."
+        data_tests:
+          - not_null
+        
+      - name: cnpj_dv
+        description: "Dígito verificador do número de inscrição no CNPJ (Dois últimos dígitos)."
+        data_tests:
+          - not_null
+        
+      - name: identificador_matriz_filial
+        description: "Código do identificador Matriz/Filial (1 - MATRIZ | 2 - FILIAL)"
+        data_tests:
+          - not_null
+        
+      - name: nome_fantasia
+        description: "Corresponde ao nome fantasia do estabelecimento."
+                
+      - name: situacao_cadastral
+        description: "Código da situação cadastral (01 - NULA | 2 - ATIVA | 3 - SUSPENSA | 4 - INAPTA | 08 - BAIXADA)"
+        data_tests:
+          - not_null 
+        
+      - name: data_situacao_cadastral
+        description: "Data do evento da situação cadastral."         
+
+      - name : motivo_situacao_cadastral
+        description: "Código da motivo da situação cadastral."
+
+      - name : cidade_exterior
+        description: "Código da cidade do exterior."
+        
+      - name : pais
+        description: "Código do país."
+        
+      - name: data_inicio_atividade
+        description: "Data de início da atividade do estabelecimento."
+        data_tests:
+          - not_null 
+                
+      - name: cnae_fiscal_principal
+        description: "Código da atividade econômica principal do estabelecimento."
+        data_tests:
+          - not_null
+        
+      - name: cnae_fiscal_secundaria
+        description: "Código da(s) atividade(s) econômica(s) secundária(s) do estabelecimento."
+                
+      - name: tipo_logradouro
+        description: "Descrição do tipo de logradouro."
+                
+      - name: logradouro
+        description: "Nome do logradouro onde se localiza o estabelecimento."
+                
+      - name: numero
+        description: "Número onde se localiza o estabelecimento. Quando não houver preenchimento o padrão é 'S/N'."
+        data_tests:
+          - not_null
+        
+      - name: complemento
+        description: "Complemento para o endereço de localização do estabelecimento."
+                
+      - name: bairro
+        description: "Bairro onde se localiza o estabelecimento."
+                
+      - name: cep
+        description: "Código de Endereçamento Postal referente ao logradouro no qual o estabelecimento esta localizado."
+                
+      - name: uf
+        description: "Código da Unidade da Federação em que se encontra o estabelecimento."
+        data_tests:
+          - not_null    
+
+      - name: municipio
+        description: "Código do município onde se encontra o estabelecimento."
+        data_tests:
+          - not_null
+        
+      - name: ddd_1
+        description: "Contém o DDD 1."
+                
+      - name: telefone_1
+        description: "Contém o número do telefone 1."
+                
+      - name: ddd_2
+        description: "Contém o DDD 2."
+                
+      - name: telefone_2
+        description: "Contém o número do telefone 2."
+                
+      - name: ddd_fax
+        description: "Contém o DDD do fax."
+                
+      - name: fax
+        description: "Contém o número do fax."
+                
+      - name: email
+        description: "Contém o e-mail do contribuinte."
+                
+      - name: situacao_especial
+        description: "Código da situação especial da empresa."
+                
+      - name: data_situacao_especial
+        description: "Data em que a empresa entrou em situação especial."
+                
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+
+  - name: stg_motivos
+    description: "Tabela contendo os motivos das situações cadastrais."
+    columns:
+      - name: codigo
+        description: "Código do motivo."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: descricao
+        description: "Descrição do motivo."
+        data_tests:
+          - not_null
+
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_tests:
+          - not_null      
+
+  - name: stg_municipios  
+    description: "Tabela de municípios do Brasil."    
+    columns:
+      - name: codigo
+        description: "Código do município."
+        data_tests:        
+            - unique
+            - not_null            
+
+      - name: descricao
+        description: "Descrição do município."        
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."        
+        data_tests:
+          - not_null
+
+  - name: stg_naturezas
+    description: "Naturezas jurídicas das empresas."
+    columns:
+      - name: codigo
+        description: "Código da natureza jurídica."        
+        data_tests:
+          - unique
+          - not_null
+                  
+      - name: descricao
+        description: "Nome da natureza jurídica."        
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_tests:
+          - not_null
+
+  - name: stg_paises
+    description: "Tabela com os países do mundo."
+    columns:
+      - name: codigo
+        description: "Código do país."
+        data_tests:        
+            - unique
+            - not_null            
+
+      - name: descricao
+        description: "Descrição do país."        
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."        
+        data_tests:
+          - not_null
+
+  - name: stg_qualificacoes
+    description: "Qualificações dos sócios de empresas."
+    columns:
+      - name: codigo
+        description: "Código da qualificação."
+        data_tests:        
+            - unique
+            - not_null            
+
+      - name: descricao
+        description: "Descrição do qualificação."        
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."        
+        data_tests:
+          - not_null
+  
+  - name: stg_simples
+    description: "Tabela de dados do simples."
+    columns:
+      - name: cnpj_basico
+        description: "Número base de inscrição no CNPJ (CADASTRO NACIONAL DA  PESSOA JURÍDICA)."        
+        data_tests:
+          - unique
+          - not_null
+                        
+      - name: opcao_simples
+        description: "Indicador da existência da opção pelo SIMPLES (S - SIM | N - NÃO | EM BRANCO - OUTROS)."        
+        data_tests:
+          - not_null
+        
+      - name: data_opcao_simples
+        description: "Data de opção pelo simples."        
+        
+      - name: data_exclusao_simples
+        description: "Data de exclusão do simples."        
+                
+      - name: opcao_mei
+        description: "Indicador da existência da opção pelo MEI (S - SIM | N - NÃO | EM BRANCO - OUTROS)."        
+        data_tests:
+          - not_null
+        
+      - name: data_opcao_mei
+        description: "Data de opção pelo MEI."        
+        
+      - name: data_exclusao_mei
+        description: "Data de exclusão do MEI."        
+              
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."        
+        data_tests:
+          - not_null
+
+  - name: stg_socios
+    description: "Tabela de sócios de empresas."
+    columns:
+      - name: cnpj_basico
+        description: "Número base de inscrição no CNPJ (CADASTRO NACIONAL DA  PESSOA JURÍDICA)."        
+        data_tests:
+          - not_null
+        
+      - name: identificador
+        description: "Código do identificador de sócio (1 - PESSOA JURÍDICA | 2 - PESSOA FÍSICA | 3 - ESTRANGEIRO)"        
+        data_tests:
+          - not_null
+        
+      - name: nome_razao_social
+        description: "Nome do sócio pessoa física ou a razão social e/ou nome empresarial da pessoa jurídica e/ou nome do sócio/razão social do sócio estrangeiro."
+                        
+      - name: cpf_cnpj
+        description: "CPF ou CNPJ do sócio (SÓCIO ESTRANGEIRO NÃO TEM ESTA INFORMAÇÃO)."        
+        
+      - name: qualificacao
+        description: "Código da qualificação do sócio, referenciando a tabela de qualificações."
+        data_tests:
+          - not_null
+                                  
+      - name: data_entrada_sociedade
+        description: "Data de entrada na sociedade."
+              
+      - name: pais
+        description: "Código do país do sócio estrangeiro."
+        
+      - name: representante_legal
+        description: "Número do CPF do representante legal."
+        
+      - name: nome_do_representante
+        description: "Nome do representante legal."
+        
+      - name: qualificacao_representante
+        description: "Código da qualificação do representante legal"
+        
+      - name: faixa_etaria_socio
+        description: "Código correspondente à faixa etária do sócio."
+        data_tests:
+          - not_null
+        
+      - name: data_processamento
+        description: "Data e hora do processamento dos dados."
+        data_tests:
+          - not_null
