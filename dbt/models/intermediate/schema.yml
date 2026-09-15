@@ -203,9 +203,7 @@ models:
       - name: razao_social
         description: "Razão social da empresa."
         data_type: string
-        constraints:
-          - type: not_null
-
+        
       - name: natureza_juridica
         description: "Natureza jurídica da empresa."
         data_type: smallint
