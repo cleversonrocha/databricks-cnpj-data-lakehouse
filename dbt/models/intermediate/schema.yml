@@ -151,9 +151,7 @@ models:
       - name: cnpj_basico
         description: "cnpj_basico"
         data_type: string
-        constraints:
-          - type: not_null
-
+        
       - name: razao_social
         description: "razao_social"
         data_type: string

@@ -21,7 +21,7 @@ WITH empresas_nao_qualificadas AS (
             ) AS INTEGER
         ) AS rn
     FROM {{ ref('stg_empresas') }} em
-    QUALIFY rn > 1
+    QUALIFY rn > 1 OR cnpj_basico IS NULL OR razao_social IS NULL
 )
 
 SELECT    
