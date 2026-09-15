@@ -373,9 +373,7 @@ models:
       - name: razao_social
         description: "Razão social do estabelecimento."
         data_type: string
-        constraints:
-          - type: not_null
-
+        
       - name: nome_fantasia
         description: "Nome fantasia do estabelecimento."
         data_type: string
