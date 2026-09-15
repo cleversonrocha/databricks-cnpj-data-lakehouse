@@ -68,7 +68,9 @@ Job `databricks-cnpj-data-lakehouse-job` com três tasks encadeadas, todas em co
 
 ![job](imagens/job.png)
 
-- `ingestao_bronze`: Baixa o zip da Receita Federal, valida e descompacta.
+- `ingestao_bronze`: Descompacta os arquivos baixados manualmente da Receita Federal.
+     - Obs.: Recentemente, o servidor que hospeda os arquivos da Receita Federal, bloqueou o download automatizado via Databricks, sendo assim os arquivos precisam ser baixados e gravados manualmente.
+     - [Clique aqui](https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9?dir=/2026-09) para baixar.
 - `ingestao_silver`: Lê os CSVs da bronze e grava as tabelas Delta na silver.
 - `dbt_silver_and_gold`: Executa os comandos "dbt deps" para instalar os pacotes e dependências e "dbt build" para rodar modelos e testes, cria tabelas Delta na silver com os dados brutos da Bronze, limpa e trata os dados gerando novas tabelas e finaliza criando um modelo Star Schema na camada Gold.
 
@@ -83,9 +85,27 @@ Job `databricks-cnpj-data-lakehouse-job` com três tasks encadeadas, todas em co
 
      ![SQL Query](imagens/2.png)
 
-3. Na aba "New Query...", digite "CREATE CATALOG IF NOT EXISTS databricks_cnpj_data_lakehouse;" e clique no botão "Run all (1000)":
-     
+3. Na aba "New Query...", digite ```CREATE CATALOG IF NOT EXISTS databricks_cnpj_data_lakehouse;
+CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e clique no botão "Run all (1000)":
+          
      ![Criar catálogo](imagens/3.png)
+
+     - No menu lateral clique em "Catalog -> My organization -> databricks_cnpj_data_lakehouse -> bronze -> Volumes -> 2026_09":
+          - Clique com o botão direito no nome do volume "2026_09" e depois em "Upload to volume":     
+
+               ![Upload arquivos 1](imagens/3.1.png)               
+
+     - Clique em "browse -> Select files": 
+          
+          ![Upload arquivos 2](imagens/3.2.png)
+
+          - Selecione todos os arquivos "zip" que baixou:
+
+               ![Upload arquivos 3](imagens/3.3.png)
+
+          - Clique "Abrir" e depois em "Upload", e aguarde os arquivos serem salvos:
+
+               ![Upload arquivos 3](imagens/3.4.png)     
 
 4. No menu lateral do Databricks, clique em Workspace:
      
