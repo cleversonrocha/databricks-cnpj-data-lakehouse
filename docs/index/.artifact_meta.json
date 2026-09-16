@@ -1,17 +1,17 @@
 {
   "target_dir": "D:\\databricks-cnpj-data-lakehouse\\dbt\\target",
   "fingerprints": {
+    "manifest.json": {
+      "size": 1920278,
+      "modified_secs": 1789568764
+    },
     "semantic_manifest.json": {
       "size": 234,
-      "modified_secs": 1788445106
+      "modified_secs": 1789568763
     },
     "run_results.json": {
       "size": 358,
-      "modified_secs": 1788445106
-    },
-    "manifest.json": {
-      "size": 2027354,
-      "modified_secs": 1788445106
+      "modified_secs": 1789568764
     }
   },
   "write_source": "DirectWrite",
