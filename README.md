@@ -64,7 +64,7 @@ A macro `generate_schema_name` também foi sobrescrita para usar apenas o `custo
 
 ## Orquestração (Databricks Workflows)
 
-Job `databricks-cnpj-data-lakehouse-job` com três tasks encadeadas, todas em compute **Serverless**:
+Job `databricks-cnpj-data-lakehouse-job` com quatro tasks encadeadas, todas em compute **Serverless**:
 
 ![job](imagens/job.png)
 
