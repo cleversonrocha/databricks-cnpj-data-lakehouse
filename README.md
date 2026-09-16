@@ -73,6 +73,7 @@ Job `databricks-cnpj-data-lakehouse-job` com três tasks encadeadas, todas em co
      - [Clique aqui](https://arquivos.receitafederal.gov.br/index.php/s/YggdBLfdninEJX9?dir=/2026-09) para baixar.
 - `ingestao_silver`: Lê os CSVs da bronze e grava as tabelas Delta na silver.
 - `dbt_silver_and_gold`: Executa os comandos "dbt deps" para instalar os pacotes e dependências e "dbt build" para rodar modelos e testes, cria tabelas Delta na silver com os dados brutos da Bronze, limpa e trata os dados gerando novas tabelas e finaliza criando um modelo Star Schema na camada Gold.
+- `create_pk_fk_optimize_tables`: Cria as Primary Keys, Foreign Keys e executa otimizações nas tabelas com Liquid Clustering (CLUSTER) e OPTIMIZE.
 
 ## Passo a passo para executar o projeto
 
@@ -150,7 +151,7 @@ CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e 
 14. Defina os campos:
 
      - Task name: ingestao_bronze
-     ![Create task](imagens/14.png)
+     ![Create task 1](imagens/14.png)
 
      - Path: Clique no campo e navegue entre as pastas "/Repos/databricks-cnpj-data-lakehouse/databricks-cnpj-data-lakehouse/notebooks/01 - Ingestão dos dados para camada Bronze" e clique no botão "Confirm".          
      ![Create task 12.1](imagens/14.1.png)
@@ -166,7 +167,7 @@ CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e 
 16. Defina os campos:
 
      - Task name: ingestao_silver
-     ![Add another task type 2](imagens/16.png)
+     ![Create task 2](imagens/16.png)
 
      - Path: Clique no campo e navegue entre as pastas "/Repos/databricks-cnpj-data-lakehouse/databricks-cnpj-data-lakehouse/notebooks/02 - Ingestão dos dados para camada Silver" e clique no botão "Confirm".
      ![Create task 12.1](imagens/16.1.png)
@@ -177,12 +178,12 @@ CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e 
 
 17. Clique novamente em "+ Add task" depois em "dbt":
 
-     ![Add another task type 3](imagens/17.png)
+     ![Create task 3](imagens/17.png)
 
 18. Defina os campos:
 
      - Task name: dbt_silver_and_gold
-     ![Add another task type 2](imagens/18.png)
+     ![Add another task type 3](imagens/18.png)
 
      - Project directory: Clique no campo e navegue entre as pastas "/Repos/databricks-cnpj-data-lakehouse/databricks-cnpj-data-lakehouse/dbt" e clique no botão "Confirm".
      ![Create task 16.1](imagens/18.1.png)
@@ -201,17 +202,33 @@ CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e 
      - Clique no botão "Create task".
      ![Create task 16.5](imagens/18.5.png)
 
-19. No canto superior direito clique em "Run now" para executar o Job:
+19. Clique novamente em "+ Add task" depois em "Notebook":
 
-     ![Create task 16.5](imagens/19.png)
+     ![Add another task type 4](imagens/19.png)     
 
-20. Acompanhe o processamento clicando em "Jobs & Pipelines" no menu lateral:
+20. Defina os campos:
 
-     ![Create task 16.5](imagens/20.png)
+     - Task name: create_pk_fk_optimize_tables
+     ![Create task 4](imagens/20.png)
 
-21. Após o Job terminar verifique os volumes e tabelas criados, clicando no menu lateral "Catalog":
+     - Path: Clique no campo e navegue entre as pastas "/Repos/cleverson.rocha82@gmail.com/databricks-cnpj-data-lakehouse/notebooks/03 - Criando Primary Keys - Foreign Keys - Otimização das tabelas" e clique no botão "Confirm".
+     ![Create task 12.1](imagens/20.1.png)
+     ![Create task 12.2](imagens/20.2.png)
+
+     - Clique no botão "Create task".
+     ![Create task 12.2](imagens/20.3.png)
+
+21. No canto superior direito clique em "Run now" para executar o Job:
 
      ![Create task 16.5](imagens/21.png)
+
+22. Acompanhe o processamento clicando em "Jobs & Pipelines" no menu lateral:
+
+     ![Create task 16.5](imagens/22.png)
+
+23. Após o Job terminar verifique os volumes e tabelas criados, clicando no menu lateral "Catalog":
+
+     ![Create task 16.5](imagens/23.png)     
 
 ## Solução de problemas
 
