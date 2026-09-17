@@ -211,7 +211,7 @@ CREATE VOLUME IF NOT EXISTS databricks_cnpj_data_lakehouse.bronze.2026_09;``` e 
      - Task name: create_pk_fk_optimize_tables
      ![Create task 4](imagens/20.png)
 
-     - Path: Clique no campo e navegue entre as pastas "/Repos/cleverson.rocha82@gmail.com/databricks-cnpj-data-lakehouse/notebooks/03 - Criando Primary Keys - Foreign Keys - Otimização das tabelas" e clique no botão "Confirm".
+     - Path: Clique no campo e navegue entre as pastas "/Repos/databricks-cnpj-data-lakehouse/databricks-cnpj-data-lakehouse/notebooks/03 - Criando Primary Keys - Foreign Keys - Otimização das tabelas" e clique no botão "Confirm".
      ![Create task 12.1](imagens/20.1.png)
      ![Create task 12.2](imagens/20.2.png)
 
